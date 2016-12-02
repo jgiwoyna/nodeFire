@@ -3,6 +3,11 @@ app.controller("SampleCtrl", function($firebaseAuth, $http) {
   var auth = $firebaseAuth();
   var self = this;
 
+  var newUser = "";
+
+  var currentUser = "";
+
+
   // This code runs whenever the user logs in
   self.logIn = function(){
     auth.$signInWithPopup("google").then(function(firebaseUser) {
@@ -12,6 +17,22 @@ app.controller("SampleCtrl", function($firebaseAuth, $http) {
     });
   };
 
+  self.createUser = function(){
+    console.log("create user function");
+      currentUser.getToken().then(function(idToken){
+        $http({
+          method: 'POST',
+          url: '/privateData',
+          data: self.newUser,
+          headers: {
+            id_token: idToken
+          }
+        }).then(function(response){
+          self.secretData = response.data;
+        });
+      });
+  };
+
   // This code runs whenever the user changes authentication states
   // e.g. whevenever the user logs in or logs out
   // this is where we put most of our logic so that we don't duplicate
@@ -19,6 +40,7 @@ app.controller("SampleCtrl", function($firebaseAuth, $http) {
   auth.$onAuthStateChanged(function(firebaseUser){
     // firebaseUser will be null if not logged in
     if(firebaseUser) {
+      currentUser = firebaseUser;
       // This is where we make our call to our server
       firebaseUser.getToken().then(function(idToken){
         $http({
